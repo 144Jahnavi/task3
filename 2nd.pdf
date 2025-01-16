@@ -1,0 +1,26 @@
+//Lambda Function to Store a Document or PDF File in an S3 Bucket
+import json
+import boto3
+import base64
+import os
+
+s3 = boto3.client('s3')
+
+def lambda_handler(event, context):
+    try:
+        # Extract parameters from the event
+        bucket_name = os.environ['BUCKET_NAME']  # Set this as an environment variable
+        file_name = event['file_name']  # File name to be stored in S3
+        file_content = event['file_content']  # Base64-encoded file content
+        decoded_file_content = base64.b64decode(file_content)
+        s3.put_object(Bucket=bucket_name, Key=file_name, Body=decoded_file_content)
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'message': f'File {file_name} uploaded successfully to {bucket_name}'})
+        }
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(e)})
+        }
